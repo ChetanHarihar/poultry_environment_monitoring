@@ -1,11 +1,21 @@
-import spidev          # Import the spidev module for SPI communication
-import RPi.GPIO as GPIO # Import the RPi.GPIO module for GPIO operations
-import time             # Import the time module for time-related functions
+# Import the spidev module for SPI communication
+import spidev
 
+# Import the RPi.GPIO module for GPIO operations
+import RPi.GPIO as GPIO
+
+# Initialize the time module for time-related functions
+import time
+
+# Define a class named MCP for interacting with MCP ADC
 class MCP:
-    def __init__(self, model="3008", spi_bus=0, spi_device=0, v_ref=5.0):  
+    def __init__(self, model="3008", spi_bus=0, spi_device=0, v_ref=5.0):
         # Set the GPIO mode to BCM (Broadcom SOC channel numbering)
         GPIO.setmode(GPIO.BCM)
+
+        # Check if the provided model is supported
+        if model not in ["3004", "3008"]:
+            raise ValueError("Invalid MCP model. Supported models are '3004' or '3008'.")
 
         # Open SPI bus (Create an SPI object)
         self.spi = spidev.SpiDev()
@@ -26,8 +36,6 @@ class MCP:
         elif model == "3004":
             self.bit_depth = 10
             self.max_channels = 3
-        else:
-            raise ValueError("Invalid MCP model. Supported models are '3004' or '3008'.")
 
     def read_channel(self, channel):
         """
@@ -66,45 +74,3 @@ class MCP:
         """
         GPIO.cleanup()
         self.spi.close()
-
-def main():
-    # Get user input for the MCP model (3004 or 3008)
-    model_input = input("Enter the MCP model (3004 or 3008): ").strip()
-    if model_input not in ["3004", "3008"]:
-        print("Invalid model. Please enter either '3004' or '3008'.")
-        return
-
-    adc_module = MCP(model=model_input)
-
-    try:
-        while True:
-            # Get user input for the channel
-            channel_input = int(input(f"Enter the channel (0 to {adc_module.max_channels}): ").strip())
-            if not 0 <= channel_input <= adc_module.max_channels:
-                print(f"Invalid channel. Please enter a channel between 0 and {adc_module.max_channels}.")
-                continue
-
-            # Enable the MCP ADC by setting the custom chip select (CS_ADC) to low
-            GPIO.output(adc_module.CS_ADC, GPIO.LOW)
-
-            # Read the raw ADC value from the specified channel
-            raw_value = adc_module.read_channel(channel_input)
-
-            # Disable the MCP ADC by setting the custom chip select (CS_ADC) to high
-            GPIO.output(adc_module.CS_ADC, GPIO.HIGH)
-
-            print(f"Raw Value: {raw_value}")
-
-            # Convert the raw ADC value to voltage using the MCP's bit depth and reference voltage
-            voltage = adc_module.convert_to_voltage(raw_value)
-            print(f"Voltage: {voltage:.3f}V")
-
-            # Wait for 1 second before the next reading
-            time.sleep(1)
-
-    except KeyboardInterrupt:
-        print("Measurement stopped by the user.")
-        adc_module.cleanup()
-
-if __name__ == "__main__":
-    main()
