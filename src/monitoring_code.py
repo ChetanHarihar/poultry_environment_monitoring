@@ -21,29 +21,35 @@ DHT_PIN = 4
 def read_sensor_values():
     # Read LDR value from channel 0
     ldr_channel = 0
+    GPIO.output(CS_ADC, GPIO.LOW)
     ldr_raw_value = adc_module.read_channel(ldr_channel)  # Read raw ADC value from LDR channel
+    GPIO.output(CS_ADC, GPIO.HIGH)
     ldr_voltage = adc_module.convert_to_voltage(ldr_raw_value)  # Convert raw value to voltage
 
     # Read gas sensor 1 value from channel 1
     gas_sen1_channel = 1
+    GPIO.output(CS_ADC, GPIO.LOW)
     gas_sen1_raw_value = adc_module.read_channel(gas_sen1_channel)  # Read raw ADC value from gas_sen1 channel
+    GPIO.output(CS_ADC, GPIO.HIGH)
     gas_sen1_voltage = adc_module.convert_to_voltage(gas_sen1_raw_value)  # Convert raw value to voltage
 
     # Read gas sensor 2 value from channel 2
     gas_sen2_channel = 2
+    GPIO.output(CS_ADC, GPIO.LOW)
     gas_sen2_raw_value = adc_module.read_channel(gas_sen2_channel)  # Read raw ADC value from gas_sen2 channel
+    GPIO.output(CS_ADC, GPIO.HIGH)
     gas_sen2_voltage = adc_module.convert_to_voltage(gas_sen2_raw_value)  # Convert raw value to voltage
 
     # Read humidity and temperature from the DHT11 sensor
     humidity, temperature = Adafruit_DHT.read(DHT_SENSOR, DHT_PIN)
 
-    return temperature, humidity, gas_sen1_voltage, gas_sen2_voltage
+    return temperature, humidity, ldr_voltage, gas_sen1_voltage, gas_sen2_voltage
 
 # Main loop to send data to ThingSpeak
 try:
     while True:
         # Read sensor values
-        temp, humidity, gas1_value, gas2_value = read_sensor_values()
+        temp, humidity, ldr_value, gas1_value, gas2_value = read_sensor_values()
 
         # Prepare data to send to ThingSpeak
         payload = {'field1': temp, 'field2': humidity, 'field3': gas1_value, 'field4': gas2_value}
@@ -52,10 +58,10 @@ try:
         response = requests.post(url, params=payload)
 
         # Print the response from ThingSpeak
-        print(f"Data sent - Temp: {temp}, Humidity: {humidity}, Gas Sensor 1: {gas1_value}, Gas Sensor 2: {gas2_value}. Response: {response.text}")
-
+        print(f"Data sent - Temp: {temp}, Humidity: {humidity}, LDR: {ldr_value}, Gas Sensor 1: {gas1_value}, Gas Sensor 2: {gas2_value}. Response: {response.text}")
+        
         # Wait for 15 seconds before sending the next update
-        time.sleep(15)
+        time.sleep(5)
 
 except KeyboardInterrupt:
     print("Script terminated by user.")
