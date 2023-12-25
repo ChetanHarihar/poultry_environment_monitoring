@@ -32,14 +32,14 @@ def read_sensor_values():
     GPIO.output(adc_module.CS_ADC, GPIO.LOW)
     gas_sen1_raw_value = adc_module.read_channel(gas_sen1_channel)  # Read raw ADC value from gas_sen1 channel
     GPIO.output(adc_module.CS_ADC, GPIO.HIGH)
-    gas_sen1_voltage = round(adc_module.convert_to_voltage(gas_sen1_raw_value), 2)  # Convert raw value to voltage
+    gas_sen1_voltage = round(adc_module.convert_to_voltage(gas_sen1_raw_value), 2)  # Convert raw value to voltage and round to 2 decimal places
 
     # Read gas sensor 2 value from channel 2
     gas_sen2_channel = 2
     GPIO.output(adc_module.CS_ADC, GPIO.LOW)
     gas_sen2_raw_value = adc_module.read_channel(gas_sen2_channel)  # Read raw ADC value from gas_sen2 channel
     GPIO.output(adc_module.CS_ADC, GPIO.HIGH)
-    gas_sen2_voltage = round(adc_module.convert_to_voltage(gas_sen2_raw_value), 2)  # Convert raw value to voltage
+    gas_sen2_voltage = round(adc_module.convert_to_voltage(gas_sen2_raw_value), 2)  # Convert raw value to voltage and round to 2 decimal places
 
     # Read humidity and temperature from the DHT11 sensor
     humidity, temperature = Adafruit_DHT.read(DHT_SENSOR, DHT_PIN)
