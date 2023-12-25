@@ -1,7 +1,7 @@
 from mcpadc import MCP  # Import the MCP class from the provided module
 import Adafruit_DHT  # Import the Adafruit_DHT library to work with the DHT11 sensor
-import requests
-import time
+import requests  # Import the requests module for HTTP requests
+import time  # Import the time module for time-related functions
 
 # Replace with your ThingSpeak API Key and Channel ID
 api_key = "YOUR_API_KEY"
