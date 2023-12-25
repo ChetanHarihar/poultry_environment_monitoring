@@ -40,7 +40,7 @@ def convert_to_voltage(value, bit_depth, v_ref):
     Parameters:
     - value: The raw ADC value to convert.
     - bit_depth: The bit depth of the ADC (e.g., 10 bits for MCP3008).
-    - v_ref: The reference voltage of the ADC.
+    - v_ref: The reference voltage of the ADC (3.3V / 5V).
 
     Returns:
     - The voltage corresponding to the given ADC value.
@@ -61,7 +61,7 @@ while True:
     print(f"Raw Value: {raw_value}")
 
     # Convert the raw ADC value to voltage using the MCP3008's 10-bit resolution and 3.3V reference
-    voltage = convert_to_voltage(raw_value, 10, 3.3)
+    voltage = convert_to_voltage(raw_value, 10, 5)
     print(f"Voltage: {voltage:.3f}V")
 
     # Wait for 1 second before the next reading
