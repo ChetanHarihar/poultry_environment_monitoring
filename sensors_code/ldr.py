@@ -60,7 +60,7 @@ while True:
 
     print(f"Raw Value: {raw_value}")
 
-    # Convert the raw ADC value to voltage using the MCP3008's 10-bit resolution and 3.3V reference
+    # Convert the raw ADC value to voltage using the MCP3008's 10-bit resolution and 5V reference
     voltage = convert_to_voltage(raw_value, 10, 5)
     print(f"Voltage: {voltage:.3f}V")
 
