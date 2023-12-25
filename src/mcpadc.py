@@ -24,7 +24,7 @@ class MCP:
             self.bit_depth = 10
             self.max_channels = 7
         elif model == "3004":
-            self.bit_depth = 12
+            self.bit_depth = 10
             self.max_channels = 3
         else:
             raise ValueError("Invalid MCP model. Supported models are '3004' or '3008'.")
