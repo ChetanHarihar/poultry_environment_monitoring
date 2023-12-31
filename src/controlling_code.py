@@ -5,6 +5,7 @@ import time
 import RPi.GPIO as GPIO
 
 # Initialize MCP object for MCP3008 ADC (10-bit resolution, 8 channels)
+# Connect ADC to GPIO pin 12
 adc_module = MCP(model="3008", v_ref=5.0)
 
 # Set the sensor type (DHT11) and the GPIO pin number to which the sensor is connected
@@ -12,7 +13,6 @@ DHT_SENSOR = Adafruit_DHT.DHT11
 DHT_PIN = 4
 
 # Define GPIO pins for actuators and push button
-# connect ADC to GPIO pin 12
 FAN_PIN = 17  # GPIO pin for DC fan
 EXHAUST_FAN_PIN = 16  # GPIO pin for exhaust fan
 LIGHT_BULB_PIN = 27  # GPIO pin for light bulb
@@ -76,7 +76,7 @@ def control_actuators(temp, humidity, ldr_value, gas1_value, gas2_value):
             GPIO.output(FAN_PIN, GPIO.LOW)  # Turn off DC fan
 
     # Control exhaust fan based on gas sensors
-    if gas1_value > GAS_THRESHOLD or gas2_value > GAS_THRESHOLD:
+    elif gas1_value > GAS_THRESHOLD or gas2_value > GAS_THRESHOLD:
         GPIO.output(EXHAUST_FAN_PIN, GPIO.HIGH)  # Turn on exhaust fan
     else:
         GPIO.output(EXHAUST_FAN_PIN, GPIO.LOW)  # Turn off exhaust fan
@@ -102,13 +102,13 @@ def control_actuators(temp, humidity, ldr_value, gas1_value, gas2_value):
 # Main loop for monitoring and controlling
 try:
     while True:
-        # read sensor values
+        # Read sensor values
         temp, humidity, ldr_value, gas1_value, gas2_value = read_sensor_values()
 
         print(f"Temp: {temp}, Humidity: {humidity}, LDR: {ldr_value}, Gas Sensor 1: {gas1_value}, Gas Sensor 2: {gas2_value}")
 
-        # Control actuators and handle button press
-        control_actuators()
+        # Control actuators
+        control_actuators(temp, humidity, ldr_value, gas1_value, gas2_value)
 
         # Add a delay to avoid excessive readings
         time.sleep(0.1)
