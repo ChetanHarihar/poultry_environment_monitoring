@@ -65,6 +65,7 @@ def read_sensor_values():
 
 # Function to control actuators based on sensor values
 def control_actuators(temp, gas1_value, gas2_value, ldr_value):
+    global previous_state, current_state
     # Control DC fan based on temperature
     if temp is not None:
         if temp > TEMP_THRESHOLD:
