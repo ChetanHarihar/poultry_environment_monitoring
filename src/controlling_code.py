@@ -65,10 +65,8 @@ def read_sensor_values():
     return temperature, humidity, ldr_voltage, gas_sen1_voltage, gas_sen2_voltage
 
 # Function to control actuators based on sensor values and handle button press
-def control_actuators_and_button():
+def control_actuators(temp, humidity, ldr_value, gas1_value, gas2_value):
     global previous_state, current_state
-    # Read sensor values
-    temp, humidity, ldr_value, gas1_value, gas2_value = read_sensor_values()
 
     # Control DC fan based on temperature
     if temp is not None:
@@ -104,11 +102,13 @@ def control_actuators_and_button():
 # Main loop for monitoring and controlling
 try:
     while True:
-        # Control actuators and handle button press
-        control_actuators_and_button()
+        # read sensor values
+        temp, humidity, ldr_value, gas1_value, gas2_value = read_sensor_values()
 
-        # Print sensor values (you can replace this with logging or other forms of output)
         print(f"Temp: {temp}, Humidity: {humidity}, LDR: {ldr_value}, Gas Sensor 1: {gas1_value}, Gas Sensor 2: {gas2_value}")
+
+        # Control actuators and handle button press
+        control_actuators()
 
         # Add a delay to avoid excessive readings
         time.sleep(0.1)
