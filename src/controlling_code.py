@@ -15,8 +15,8 @@ DHT_PIN = 4
 FAN_PIN = 17  # GPIO pin for DC fan
 EXHAUST_FAN_PIN = 18  # GPIO pin for exhaust fan
 LIGHT_BULB_PIN = 27  # GPIO pin for light bulb
-FOGGER_PIN = 22  # GPIO pin for fogger
-PUSH_BUTTON_PIN = 23  # GPIO pin for push button
+FOGGER_PIN = 23  # GPIO pin for fogger
+PUSH_BUTTON_PIN = 22  # GPIO pin for push button
 
 # Define threshold values for sensors
 TEMP_THRESHOLD = 25.0  # Temperature threshold for turning on DC fan
@@ -30,6 +30,10 @@ GPIO.setup(EXHAUST_FAN_PIN, GPIO.OUT)
 GPIO.setup(LIGHT_BULB_PIN, GPIO.OUT)
 GPIO.setup(FOGGER_PIN, GPIO.OUT)
 GPIO.setup(PUSH_BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+# Initialize state variables for push button
+current_state = False
+previous_state = False
 
 # Function to read sensor values
 def read_sensor_values():
@@ -62,10 +66,11 @@ def read_sensor_values():
 # Function to control actuators based on sensor values
 def control_actuators(temp, gas1_value, gas2_value, ldr_value):
     # Control DC fan based on temperature
-    if temp > TEMP_THRESHOLD:
-        GPIO.output(FAN_PIN, GPIO.HIGH)  # Turn on DC fan
-    else:
-        GPIO.output(FAN_PIN, GPIO.LOW)  # Turn off DC fan
+    if temp is not None:
+        if temp > TEMP_THRESHOLD:
+            GPIO.output(FAN_PIN, GPIO.HIGH)  # Turn on DC fan
+        else:
+            GPIO.output(FAN_PIN, GPIO.LOW)  # Turn off DC fan
 
     # Control exhaust fan based on gas sensors
     if gas1_value > GAS_THRESHOLD or gas2_value > GAS_THRESHOLD:
@@ -79,11 +84,17 @@ def control_actuators(temp, gas1_value, gas2_value, ldr_value):
     else:
         GPIO.output(LIGHT_BULB_PIN, GPIO.LOW)  # Turn off light bulb
 
-    # Control fogger based on push button state
-    if GPIO.input(PUSH_BUTTON_PIN) == GPIO.LOW:
-        GPIO.output(FOGGER_PIN, GPIO.HIGH)  # Turn on fogger
-    else:
-        GPIO.output(FOGGER_PIN, GPIO.LOW)  # Turn off fogger
+    # Read the current state of the button
+        current_state = GPIO.input(PUSH_BUTTON_PIN)
+
+        # Check if the button state has changed
+        if current_state != previous_state:
+            # If the button is pressed, turn on fogger
+            if current_state == GPIO.LOW:
+                GPIO.output(FOGGER_PIN, not GPIO.input(FOGGER_PIN))
+
+            # Update the previous state
+            previous_state = current_state
 
 # Main loop for monitoring and controlling
 try:
