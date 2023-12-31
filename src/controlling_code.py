@@ -11,12 +11,13 @@ adc_module = MCP(model="3008", v_ref=5.0)
 DHT_SENSOR = Adafruit_DHT.DHT11
 DHT_PIN = 4
 
-# Define GPIO pins for actuators
+# Define GPIO pins for actuators and push button
+# connect ADC to GPIO pin 12
 FAN_PIN = 17  # GPIO pin for DC fan
-EXHAUST_FAN_PIN = 18  # GPIO pin for exhaust fan
+EXHAUST_FAN_PIN = 16  # GPIO pin for exhaust fan
 LIGHT_BULB_PIN = 27  # GPIO pin for light bulb
 FOGGER_PIN = 23  # GPIO pin for fogger
-PUSH_BUTTON_PIN = 22  # GPIO pin for push button
+PUSH_BUTTON_PIN = 18  # GPIO pin for push button
 
 # Define threshold values for sensors
 TEMP_THRESHOLD = 25.0  # Temperature threshold for turning on DC fan
@@ -63,9 +64,12 @@ def read_sensor_values():
 
     return temperature, humidity, ldr_voltage, gas_sen1_voltage, gas_sen2_voltage
 
-# Function to control actuators based on sensor values
-def control_actuators(temp, gas1_value, gas2_value, ldr_value):
+# Function to control actuators based on sensor values and handle button press
+def control_actuators_and_button():
     global previous_state, current_state
+    # Read sensor values
+    temp, humidity, ldr_value, gas1_value, gas2_value = read_sensor_values()
+
     # Control DC fan based on temperature
     if temp is not None:
         if temp > TEMP_THRESHOLD:
@@ -86,31 +90,28 @@ def control_actuators(temp, gas1_value, gas2_value, ldr_value):
         GPIO.output(LIGHT_BULB_PIN, GPIO.LOW)  # Turn off light bulb
 
     # Read the current state of the button
-        current_state = GPIO.input(PUSH_BUTTON_PIN)
+    current_state = GPIO.input(PUSH_BUTTON_PIN)
 
-        # Check if the button state has changed
-        if current_state != previous_state:
-            # If the button is pressed, turn on fogger
-            if current_state == GPIO.LOW:
-                GPIO.output(FOGGER_PIN, not GPIO.input(FOGGER_PIN))
+    # Check if the button state has changed
+    if current_state != previous_state:
+        # If the button is pressed, turn on fogger
+        if current_state == GPIO.LOW:
+            GPIO.output(FOGGER_PIN, not GPIO.input(FOGGER_PIN))
 
-            # Update the previous state
-            previous_state = current_state
+        # Update the previous state
+        previous_state = current_state
 
 # Main loop for monitoring and controlling
 try:
     while True:
-        # Read sensor values
-        temp, humidity, ldr_value, gas1_value, gas2_value = read_sensor_values()
-
-        # Control actuators based on sensor values
-        control_actuators(temp, gas1_value, gas2_value, ldr_value)
+        # Control actuators and handle button press
+        control_actuators_and_button()
 
         # Print sensor values (you can replace this with logging or other forms of output)
         print(f"Temp: {temp}, Humidity: {humidity}, LDR: {ldr_value}, Gas Sensor 1: {gas1_value}, Gas Sensor 2: {gas2_value}")
 
         # Add a delay to avoid excessive readings
-        time.sleep(5)
+        time.sleep(0.1)
 
 except KeyboardInterrupt:
     print("Script terminated by user.")
