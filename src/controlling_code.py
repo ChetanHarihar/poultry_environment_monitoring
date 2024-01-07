@@ -1,8 +1,8 @@
 # Import necessary libraries
-from mcpadc import MCP
-import Adafruit_DHT
-import time
-import RPi.GPIO as GPIO
+from mcpadc import MCP  # Import the MCP class from the provided module
+import Adafruit_DHT  # Import the Adafruit_DHT library to work with the DHT11 sensor
+import time  # Import the time module for time-related functions
+import RPi.GPIO as GPIO  # Import the RPi.GPIO module for GPIO operations
 
 # Initialize MCP object for MCP3008 ADC (10-bit resolution, 8 channels)
 # Connect ADC to GPIO pin 12
@@ -71,18 +71,21 @@ def control_actuators(temp, humidity, ldr_value, gas1_value, gas2_value):
     # Control DC fan based on temperature
     if temp is not None:
         if temp > TEMP_THRESHOLD:
+            print("Temperature is high")
             GPIO.output(FAN_PIN, GPIO.HIGH)  # Turn on DC fan
         else:
             GPIO.output(FAN_PIN, GPIO.LOW)  # Turn off DC fan
 
     # Control exhaust fan based on gas sensors
     elif gas1_value > GAS_THRESHOLD or gas2_value > GAS_THRESHOLD:
+        print("Gas level is high")
         GPIO.output(EXHAUST_FAN_PIN, GPIO.HIGH)  # Turn on exhaust fan
     else:
         GPIO.output(EXHAUST_FAN_PIN, GPIO.LOW)  # Turn off exhaust fan
 
     # Control light bulb based on light intensity
     if ldr_value < LIGHT_THRESHOLD:
+        print("Light intensity is low")
         GPIO.output(LIGHT_BULB_PIN, GPIO.HIGH)  # Turn on light bulb
     else:
         GPIO.output(LIGHT_BULB_PIN, GPIO.LOW)  # Turn off light bulb
@@ -94,6 +97,7 @@ def control_actuators(temp, humidity, ldr_value, gas1_value, gas2_value):
     if current_state != previous_state:
         # If the button is pressed, turn on fogger
         if current_state == GPIO.LOW:
+            print("Pushbutton is pressed")
             GPIO.output(FOGGER_PIN, not GPIO.input(FOGGER_PIN))
 
         # Update the previous state
@@ -109,9 +113,6 @@ try:
 
         # Control actuators
         control_actuators(temp, humidity, ldr_value, gas1_value, gas2_value)
-
-        # Add a delay to avoid excessive readings
-        time.sleep(0.1)
 
 except KeyboardInterrupt:
     print("Script terminated by user.")
