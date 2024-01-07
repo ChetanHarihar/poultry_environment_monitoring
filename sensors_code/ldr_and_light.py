@@ -16,6 +16,7 @@ CS_ADC = 12
 GPIO.setup(CS_ADC, GPIO.OUT)  # Set the CS_ADC pin as an output
 
 LIGHT_BULB_PIN = 27  # GPIO pin for light bulb
+GPIO.setup(LIGHT_BULB_PIN, GPIO.OUT)  # Set light pin as output 
 
 LIGHT_THRESHOLD = 2.0  # Light intensity threshold for turning on light bulb
 
