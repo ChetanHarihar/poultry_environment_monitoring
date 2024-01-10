@@ -16,7 +16,7 @@ DHT_PIN = 4
 FAN_PIN = 17  # GPIO pin for DC fan
 EXHAUST_FAN_PIN = 16  # GPIO pin for exhaust fan
 LIGHT_BULB_PIN = 27  # GPIO pin for light bulb
-FOGGER_PIN = 23  # GPIO pin for fogger
+FOGGER_PIN = 24  # GPIO pin for fogger
 PUSH_BUTTON_PIN = 18  # GPIO pin for push button
 
 # Define threshold values for sensors
