@@ -5,6 +5,7 @@ import time
 # Set the sensor type (DHT11) and the GPIO pin number to which the sensor is connected
 DHT_SENSOR = Adafruit_DHT.DHT11
 DHT_PIN = 4
+fan = 18
 
 # Setup GPIO
 GPIO.setmode(GPIO.BCM)
