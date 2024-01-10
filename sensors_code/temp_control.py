@@ -20,10 +20,11 @@ while True:
     if humidity is not None and temperature is not None:
         # Print the temperature and humidity in a formatted string
         print("Temperature={0:0.1f}C Humidity={1:0.1f}%".format(temperature, humidity))
-        if temperature > 27.0:
+        if temperature >= 27.0:
             print("Temperature is high")
+            GPIO.output(fan, GPIO.HIGH)
         else:
-            pass
+            GPIO.output(fan, GPIO.LOW)
     else:
         # Print an error message if there is a sensor failure
         print("Sensor failure. Check wiring.")
