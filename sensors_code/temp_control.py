@@ -8,7 +8,7 @@ DHT_PIN = 4
 
 # Setup GPIO
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(led_pin, GPIO.OUT)
+GPIO.setup(fan, GPIO.OUT)
 
 # Infinite loop to continuously read sensor data
 while True:
