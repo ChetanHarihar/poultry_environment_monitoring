@@ -11,6 +11,12 @@ spi = spidev.SpiDev()
 spi.open(0, 0)  # Open SPI bus with bus=0 and device=0
 spi.max_speed_hz = 1000000  # Set the SPI bus speed to 1 MHz
 
+
+
+EXHAUST_PIN = 24  # GPIO pin for light bulb
+GPIO.setup(EXHAUST_PIN, GPIO.OUT)  # Set light pin as output 
+GAS_THRESHOLD = 4.0
+
 # Define custom chip select (CS) pin for the MCP3008 ADC
 CS_ADC = 12
 GPIO.setup(CS_ADC, GPIO.OUT)  # Set the CS_ADC pin as an output
@@ -67,5 +73,10 @@ while True:
     voltage = convert_to_voltage(raw_value, 10, 5)
     print(f"Voltage: {voltage:.3f}V")
 
+    if voltage > GAS_THRESHOLD:
+        print("Gas level is high")
+        GPIO.output(EXHAUST_PIN, GPIO.HIGH)  # Turn on light bulb
+    else:
+        GPIO.output(EXHAUST_PIN, GPIO.LOW)  # Turn off light bulb
     # Wait for 1 second before the next reading
     time.sleep(1)
