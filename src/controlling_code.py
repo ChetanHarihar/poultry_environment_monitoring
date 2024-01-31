@@ -13,16 +13,16 @@ DHT_SENSOR = Adafruit_DHT.DHT11
 DHT_PIN = 4
 
 # Define GPIO pins for actuators and push button
-FAN_PIN = 17  # GPIO pin for DC fan
-EXHAUST_FAN_PIN = 16  # GPIO pin for exhaust fan
+FAN_PIN = 2  # GPIO pin for DC fan
+EXHAUST_FAN_PIN = 21  # GPIO pin for exhaust fan
 LIGHT_BULB_PIN = 27  # GPIO pin for light bulb
 FOGGER_PIN = 24  # GPIO pin for fogger
 PUSH_BUTTON_PIN = 18  # GPIO pin for push button
 
 # Define threshold values for sensors
-TEMP_THRESHOLD = 25.0  # Temperature threshold for turning on DC fan
-GAS_THRESHOLD = 500  # Gas threshold for turning on exhaust fan
-LIGHT_THRESHOLD = 200  # Light intensity threshold for turning on light bulb
+TEMP_THRESHOLD = 27.0  # Temperature threshold for turning on DC fan
+GAS_THRESHOLD = 3  # Gas threshold for turning on exhaust fan
+LIGHT_THRESHOLD = 2  # Light intensity threshold for turning on light bulb
 
 # Setup GPIO mode and pins
 GPIO.setmode(GPIO.BCM)
@@ -31,6 +31,7 @@ GPIO.setup(EXHAUST_FAN_PIN, GPIO.OUT)
 GPIO.setup(LIGHT_BULB_PIN, GPIO.OUT)
 GPIO.setup(FOGGER_PIN, GPIO.OUT)
 GPIO.setup(PUSH_BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setwarnings(False)
 
 # Initialize state variables for push button
 current_state = False
