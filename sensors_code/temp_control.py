@@ -10,6 +10,7 @@ fan = 18
 # Setup GPIO
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(fan, GPIO.OUT)
+GPIO.setwarnings(False)
 
 # Infinite loop to continuously read sensor data
 while True:
