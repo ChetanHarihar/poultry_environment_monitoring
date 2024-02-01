@@ -18,6 +18,29 @@ adc_module = MCP(model="3008", v_ref=5.0)  # Create an MCP object with specified
 DHT_SENSOR = Adafruit_DHT.DHT11
 DHT_PIN = 4
 
+# Function to convert output_voltage to ppm
+def convert_voltage_to_ppm(sensor_voltage, gas_type):
+    """
+    Converts the voltage reading from a gas sensor to parts per million (ppm) based on the gas type.
+
+    Parameters:
+    - sensor_voltage: The voltage reading from the gas sensor.
+    - gas_type: The type of gas the sensor is detecting ("methane" or "ammonia").
+
+    Returns:
+    - The estimated gas concentration in parts per million (ppm).
+    """
+    methane_sensitivity = 5.0
+    ammonia_sensitivity = 3.0
+
+    if gas_type == "methane":
+        ppm = sensor_voltage * methane_sensitivity
+    elif gas_type == "ammonia":
+        ppm = sensor_voltage * ammonia_sensitivity
+    else:
+        raise ValueError("Invalid gas type. Supported types are 'methane' and 'ammonia'.")
+    return ppm
+
 # Function to read sensor values
 def read_sensor_values():
     # Read LDR value from channel 0
@@ -51,6 +74,10 @@ try:
     while True:
         # Read sensor values
         temp, humidity, ldr_value, gas1_value, gas2_value = read_sensor_values()
+
+        # convert gas values to ppm values
+        gas1_value = convert_voltage_to_ppm(gas1_value, "methane")
+        gas2_value = convert_voltage_to_ppm(gas2_value, "ammonia")
 
         # Prepare data to send to ThingSpeak
         payload = {'field1': temp, 'field2': humidity, 'field3': gas1_value, 'field4': gas2_value}
