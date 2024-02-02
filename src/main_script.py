@@ -3,11 +3,10 @@ from mcpadc import MCP  # Import the MCP class from the provided module
 import Adafruit_DHT  # Import the Adafruit_DHT library to work with the DHT11 sensor
 import time  # Import the time module for time-related functions
 import RPi.GPIO as GPIO  # Import the RPi.GPIO module for GPIO operations
-import requests  # Import the requests module for HTTP requests
 
 # Replace with your ThingSpeak API Key and Channel ID
-api_key = "DNCTR3RHNE4CUYMN"
-channel_id = "2388748"
+api_key = "YOUR_API_KEY"
+channel_id = "YOUR_CHANNEL_ID"
 
 # ThingSpeak API URL
 url = f"https://api.thingspeak.com/update?api_key={api_key}"
@@ -21,16 +20,16 @@ DHT_SENSOR = Adafruit_DHT.DHT11
 DHT_PIN = 4
 
 # Define GPIO pins for actuators and push button
-FAN_PIN = 17  # GPIO pin for DC fan
-EXHAUST_FAN_PIN = 16  # GPIO pin for exhaust fan
+FAN_PIN = 2  # GPIO pin for DC fan
+EXHAUST_FAN_PIN = 21  # GPIO pin for exhaust fan
 LIGHT_BULB_PIN = 27  # GPIO pin for light bulb
 FOGGER_PIN = 24  # GPIO pin for fogger
 PUSH_BUTTON_PIN = 18  # GPIO pin for push button
 
 # Define threshold values for sensors
-TEMP_THRESHOLD = 25.0  # Temperature threshold for turning on DC fan
-GAS_THRESHOLD = 500  # Gas threshold for turning on exhaust fan
-LIGHT_THRESHOLD = 200  # Light intensity threshold for turning on light bulb
+TEMP_THRESHOLD = 27.0  # Temperature threshold for turning on DC fan
+GAS_THRESHOLD = 3  # Gas threshold for turning on exhaust fan
+LIGHT_THRESHOLD = 2  # Light intensity threshold for turning on light bulb
 
 # Setup GPIO mode and pins
 GPIO.setmode(GPIO.BCM)
@@ -39,10 +38,34 @@ GPIO.setup(EXHAUST_FAN_PIN, GPIO.OUT)
 GPIO.setup(LIGHT_BULB_PIN, GPIO.OUT)
 GPIO.setup(FOGGER_PIN, GPIO.OUT)
 GPIO.setup(PUSH_BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setwarnings(False)
 
 # Initialize state variables for push button
 current_state = False
 previous_state = False
+
+# Function to convert output_voltage to ppm
+def convert_voltage_to_ppm(sensor_voltage, gas_type):
+    """
+    Converts the voltage reading from a gas sensor to parts per million (ppm) based on the gas type.
+
+    Parameters:
+    - sensor_voltage: The voltage reading from the gas sensor.
+    - gas_type: The type of gas the sensor is detecting ("methane" or "ammonia").
+
+    Returns:
+    - The estimated gas concentration in parts per million (ppm).
+    """
+    methane_sensitivity = 5.0
+    ammonia_sensitivity = 3.0
+
+    if gas_type == "methane":
+        ppm = sensor_voltage * methane_sensitivity
+    elif gas_type == "ammonia":
+        ppm = sensor_voltage * ammonia_sensitivity
+    else:
+        raise ValueError("Invalid gas type. Supported types are 'methane' and 'ammonia'.")
+    return ppm
 
 # Function to read sensor values
 def read_sensor_values():
@@ -117,16 +140,22 @@ try:
         # Read sensor values
         temp, humidity, ldr_value, gas1_value, gas2_value = read_sensor_values()
 
+        # Control actuators
+        control_actuators(temp, humidity, ldr_value, gas1_value, gas2_value)
+
+        gas1_ppm = convert_voltage_to_ppm(gas1_value, "methane")
+        gas2_ppm = convert_voltage_to_ppm(gas2_value, "ammonia")
+
+        print(f"Temp: {temp}, Humidity: {humidity}, LDR: {ldr_value}, Gas Sensor 1: {gas1_ppm} ppm, Gas Sensor 2: {gas2_ppm} ppm")
+
         # Prepare data to send to ThingSpeak
         payload = {'field1': temp, 'field2': humidity, 'field3': gas1_value, 'field4': gas2_value}
 
         # Make the HTTP request to update ThingSpeak channel
         response = requests.post(url, params=payload)
 
-        print(f"Temp: {temp}, Humidity: {humidity}, LDR: {ldr_value}, Gas Sensor 1: {gas1_value}, Gas Sensor 2: {gas2_value}, Response: {response.text}")
-
-        # Control actuators
-        control_actuators(temp, humidity, ldr_value, gas1_value, gas2_value)
+        # Print the response from ThingSpeak
+        print(f"Data sent - Temp: {temp}, Humidity: {humidity}, LDR: {ldr_value}, Gas Sensor 1: {gas1_ppm}, Gas Sensor 2: {gas2_ppm}. Response: {response.text}")
 
 except KeyboardInterrupt:
     print("Script terminated by user.")
