@@ -129,8 +129,6 @@ try:
         gas1_ppm = convert_voltage_to_ppm(gas1_value, "methane")
         gas2_ppm = convert_voltage_to_ppm(gas2_value, "ammonia")
 
-        print(f"Temp: {temp}, Humidity: {humidity}, LDR: {ldr_value}, Gas Sensor 1: {gas1_ppm} ppm, Gas Sensor 2: {gas2_ppm} ppm")
-
         # Prepare data to send to ThingSpeak
         payload = {'field1': temp, 'field2': humidity, 'field3': gas1_value, 'field4': gas2_value}
 
@@ -138,7 +136,7 @@ try:
         response = requests.post(url, params=payload)
 
         # Print the response from ThingSpeak
-        print(f"Data sent - Temp: {temp}, Humidity: {humidity}, LDR: {ldr_value}, Gas Sensor 1: {gas1_ppm}, Gas Sensor 2: {gas2_ppm}. Response: {response.text}")
+        print(f"Data sent - Temp: {temp}, Humidity: {humidity}, LDR: {ldr_value}, Gas Sensor 1: {gas1_ppm} ppm, Gas Sensor 2: {gas2_ppm} ppm. Response: {response.text}")
 
 except KeyboardInterrupt:
     print("Script terminated by user.")
