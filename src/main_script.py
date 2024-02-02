@@ -24,7 +24,6 @@ FAN_PIN = 2  # GPIO pin for DC fan
 EXHAUST_FAN_PIN = 21  # GPIO pin for exhaust fan
 LIGHT_BULB_PIN = 27  # GPIO pin for light bulb
 FOGGER_PIN = 24  # GPIO pin for fogger
-PUSH_BUTTON_PIN = 18  # GPIO pin for push button
 
 # Define threshold values for sensors
 TEMP_THRESHOLD = 27.0  # Temperature threshold for turning on DC fan
@@ -40,9 +39,6 @@ GPIO.setup(FOGGER_PIN, GPIO.OUT)
 GPIO.setup(PUSH_BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setwarnings(False)
 
-# Initialize state variables for push button
-current_state = False
-previous_state = False
 
 # Function to convert output_voltage to ppm
 def convert_voltage_to_ppm(sensor_voltage, gas_type):
@@ -97,15 +93,15 @@ def read_sensor_values():
 
 # Function to control actuators based on sensor values and handle button press
 def control_actuators(temp, humidity, ldr_value, gas1_value, gas2_value):
-    global previous_state, current_state
-
     # Control DC fan based on temperature
     if temp is not None:
         if temp > TEMP_THRESHOLD:
             print("Temperature is high")
             GPIO.output(FAN_PIN, GPIO.HIGH)  # Turn on DC fan
+            GPIO.output(FOGGER_PIN, GPIO.HIGH) # Turn on fogger
         else:
             GPIO.output(FAN_PIN, GPIO.LOW)  # Turn off DC fan
+            GPIO.output(FOGGER_PIN, GPIO.LOW)  # Turn off fogger
 
     # Control exhaust fan based on gas sensors
     elif gas1_value > GAS_THRESHOLD or gas2_value > GAS_THRESHOLD:
@@ -120,19 +116,6 @@ def control_actuators(temp, humidity, ldr_value, gas1_value, gas2_value):
         GPIO.output(LIGHT_BULB_PIN, GPIO.HIGH)  # Turn on light bulb
     else:
         GPIO.output(LIGHT_BULB_PIN, GPIO.LOW)  # Turn off light bulb
-
-    # Read the current state of the button
-    current_state = GPIO.input(PUSH_BUTTON_PIN)
-
-    # Check if the button state has changed
-    if current_state != previous_state:
-        # If the button is pressed, turn on fogger
-        if current_state == GPIO.LOW:
-            print("Pushbutton is pressed")
-            GPIO.output(FOGGER_PIN, not GPIO.input(FOGGER_PIN))
-
-        # Update the previous state
-        previous_state = current_state
 
 # Main loop for monitoring and controlling
 try:
