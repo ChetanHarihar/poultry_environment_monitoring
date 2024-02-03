@@ -20,11 +20,20 @@ adc_module = MCP(model="3008", v_ref=5.0)
 DHT_SENSOR = Adafruit_DHT.DHT11
 DHT_PIN = 4
 
+# Define ultrasonic sensor pins
+TRIG = 20  # Example GPIO 23 for Trigger
+ECHO = 16  # Example GPIO 24 for Echo
+
+# Set up the GPIO channels - output (TRIG), and input (ECHO)
+GPIO.setup(TRIG, GPIO.OUT)
+GPIO.setup(ECHO, GPIO.IN)
+
 # Define GPIO pins for actuators and push button
 FAN_PIN = 2  # GPIO pin for DC fan
 EXHAUST_FAN_PIN = 21  # GPIO pin for exhaust fan
 LIGHT_BULB_PIN = 27  # GPIO pin for light bulb
 FOGGER_PIN = 24  # GPIO pin for fogger
+BUZZER = 18  # GPIO pin for the buzzer
 
 # Define threshold values for sensors
 TEMP_THRESHOLD = 27.0  # Temperature threshold for turning on DC fan
@@ -37,8 +46,45 @@ GPIO.setup(FAN_PIN, GPIO.OUT)
 GPIO.setup(EXHAUST_FAN_PIN, GPIO.OUT)
 GPIO.setup(LIGHT_BULB_PIN, GPIO.OUT)
 GPIO.setup(FOGGER_PIN, GPIO.OUT)
+GPIO.setup(BUZZER, GPIO.OUT)
 GPIO.setwarnings(False)
 
+# function to measure distance from ultrasonic sensor
+# Function to measure distance from ultrasonic sensor with timeout
+def get_distance():
+    # Ensure the trigger pin is low for a clean start
+    GPIO.output(TRIG, False)
+    time.sleep(0.5)  # Settle time
+
+    # Generate a 10us pulse on the trigger pin
+    GPIO.output(TRIG, True)
+    time.sleep(0.00001)
+    GPIO.output(TRIG, False)
+
+    start_time = time.time()
+    stop_time = time.time()
+
+    # Timeout for echo start and stop
+    timeout_start = 0.01  # 10 milliseconds timeout for echo to start
+    timeout_stop = 0.04  # 40 milliseconds timeout for echo to stop (adjust based on sensor range)
+
+    # Monitor echo pin for the start of the echo pulse
+    while GPIO.input(ECHO) == 0:
+        start_time = time.time()
+        if start_time - stop_time > timeout_start:  # Check if timeout occurred
+            return None  # Return None or handle timeout appropriately
+
+    # Monitor echo pin for the duration of the echo pulse
+    while GPIO.input(ECHO) == 1:
+        stop_time = time.time()
+        if stop_time - start_time > timeout_stop:  # Check if timeout occurred
+            return None  # Return None or handle timeout appropriately
+
+    # Calculate pulse duration and distance
+    time_elapsed = stop_time - start_time
+    distance = (time_elapsed * 34300) / 2  # Speed of sound wave divided by 2 (to and from)
+
+    return distance
 
 # Function to convert output_voltage to ppm
 def convert_voltage_to_ppm(sensor_voltage, gas_type):
@@ -137,6 +183,14 @@ try:
 
         # Print the response from ThingSpeak
         print(f"Data sent - Temp: {temp}, Humidity: {humidity}, LDR: {ldr_value}, Gas Sensor 1: {gas1_ppm} ppm, Gas Sensor 2: {gas2_ppm} ppm. Response: {response.text}")
+
+        distance = get_distance()
+
+        # if the distance is greater than 10cm turn on buzzer else it's off
+        if distance > 10:
+            GPIO.output(BUZZER, GPIO.HIGH)  # Turn buzzer on
+        else:
+            GPIO.output(BUZZER, GPIO.LOW)   # Turn buzzer off
 
 except KeyboardInterrupt:
     print("Script terminated by user.")
