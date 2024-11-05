@@ -1,1 +1,1 @@
-hi
+Codebase for an intelligent poultry environment monitoring system leveraging Raspberry Pi as the controller. Implements sensor data processing and actuator control to optimize conditions with temperature, humidity, light intensity, and gas levels in poultry farms.
